@@ -5,21 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Weather Dashboard</title>
   <link rel="stylesheet" href="style.css">
+  <script src="script.js"></script>
 </head>
+
 <body>
   <h1>Weather Dashboard</h1>
 
-  <input id="location" type="text" placeholder="city name or postal code">
+  <input id="city" type="text" placeholder="city name" style="outline:none; border:1px solid #bbb;">
   <button id="btn">Search</button>
 
   <p id="msg" class="msg"></p>
 
   <div id="weather" class="weather" style="display:none">
-    <h2 id="locationName"></h2>
-    <p><span id="temp"></span> <span id="tempUnit">C</span></p>
+    <h2 id="cityName"></h2>
+    <p><span id="temp"></span> C <span id="weatherEmoji"></span></p>
     <p id="desc"></p>
+    <p>Humidity: <span id="hum"></span>%</p>
+    <p>Wind: <span id="wind"></span> km/h</p>
   </div>
 
-  <script src="script.js"></script>
+
 </body>
 </html>

@@ -12,6 +12,7 @@ input {
   padding: 8px;
   width: 200px;
   margin-right: 10px;
+  border: 1px solid #bbb;
 }
 
 input:focus {

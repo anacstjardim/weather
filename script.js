@@ -1,17 +1,13 @@
-// Weather Dashboard - OpenWeatherMap API
-// Get a free API key at https://openweathermap.org/ and replace YOUR_API_KEY below
-
-var API_KEY = "YOUR_API_KEY";
-
-var locationInput = document.getElementById("location");
+var cityInput = document.getElementById("city");
 var btn = document.getElementById("btn");
 var msg = document.getElementById("msg");
 var weatherDiv = document.getElementById("weather");
 
 function search() {
-  var q = locationInput.value.trim();
-  if (q === "") {
-    msg.textContent = "Please enter a location (city name or postal code)";
+  var city = cityInput.value;
+  city = city.trim();
+  if (city === "") {
+    msg.textContent = "Type a city name";
     msg.className = "msg err";
     weatherDiv.style.display = "none";
     return;
@@ -19,56 +15,71 @@ function search() {
 
   weatherDiv.style.display = "none";
 
-  // 1. Geocoding: convert location to lat and lon
-  var geoUrl = "https://api.openweathermap.org/geo/1.0/direct?q=" + encodeURIComponent(q) + "&limit=1&appid=" + API_KEY;
+  var geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(city) + "&count=1";
   fetch(geoUrl)
     .then(function(res) {
-      if (!res.ok) throw new Error("Request failed");
       return res.json();
     })
     .then(function(geoData) {
-      if (!geoData || geoData.length === 0) {
-        msg.textContent = "Location not found. Try another city or postal code.";
+      if (!geoData.results || geoData.results.length === 0) {
+        msg.textContent = "City not found";
         msg.className = "msg err";
         return;
       }
-      var lat = geoData[0].lat;
-      var lon = geoData[0].lon;
-      var locationName = geoData[0].name;
+      var lat = geoData.results[0].latitude;
+      var lon = geoData.results[0].longitude;
+      var name = geoData.results[0].name;
+      var country = geoData.results[0].country || geoData.results[0].country_code || "";
+      if (country) name = name + ", " + country;
 
-      // 2. Fetch current weather for that lat/lon
-      var weatherUrl = "https://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=metric&appid=" + API_KEY;
+      var weatherUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
       return fetch(weatherUrl).then(function(res) {
-        if (!res.ok) throw new Error("Weather request failed");
         return res.json();
       }).then(function(weatherData) {
-        // 3. Select only the data needed: name, temperature, weather description
-        var name = weatherData.name;
-        var temp = weatherData.main.temp;
-        var description = weatherData.weather[0].description;
-
-        // 4. Update the dashboard UI
-        document.getElementById("locationName").textContent = name;
-        document.getElementById("temp").textContent = Math.round(temp);
-        document.getElementById("tempUnit").textContent = "C";
-        document.getElementById("desc").textContent = description;
+        var cur = weatherData.current;
+        if (!cur) {
+          msg.textContent = "No data";
+          msg.className = "msg err";
+          return;
+        }
+        document.getElementById("cityName").textContent = name;
+        document.getElementById("temp").textContent = Math.round(cur.temperature_2m);
+        document.getElementById("weatherEmoji").textContent = getWeatherEmoji(cur.weather_code) + " (" + cur.weather_code + ")";
+        document.getElementById("desc").textContent = weatherDesc(cur.weather_code);
+        document.getElementById("hum").textContent = cur.relative_humidity_2m;
+        document.getElementById("wind").textContent = cur.wind_speed_10m;
         msg.textContent = "";
         weatherDiv.style.display = "block";
       });
     })
-    .catch(function(err) {
-      if (err.message === "Failed to fetch" || err.name === "TypeError") {
-        msg.textContent = "Network error. Check your connection and try again.";
-      } else if (API_KEY === "YOUR_API_KEY") {
-        msg.textContent = "Please add your OpenWeatherMap API key in script.js";
-      } else {
-        msg.textContent = "Something went wrong. Please try again.";
-      }
+    .catch(function() {
+      msg.textContent = "Something went wrong try again";
       msg.className = "msg err";
     });
 }
 
+function weatherDesc(code) {
+  if (code === 0) return "Clear";
+  if (code >= 1 && code <= 3) return "Cloudy";
+  if (code >= 45 && code <= 48) return "Foggy";
+  if (code >= 51 && code <= 67) return "Rain";
+  if (code >= 71 && code <= 77) return "Snow";
+  if (code >= 80 && code <= 82) return "Rain";
+  if (code >= 95 && code <= 99) return "Thunderstorm";
+  return "Cloudy";
+}
+
+function getWeatherEmoji(code) {
+  if (code === 0) return "\u2600";
+  if (code >= 1 && code <= 3) return "\u2601";
+  if (code >= 45 && code <= 48) return "\u2593";
+  if (code >= 51 && code <= 67 || code >= 80 && code <= 82) return "\u2614";
+  if (code >= 71 && code <= 77 || code >= 85 && code <= 86) return "\u2744";
+  if (code >= 95 && code <= 99) return "\u26C8";
+  return "\u2601";
+}
+
 btn.onclick = search;
-locationInput.onkeydown = function(e) {
+cityInput.onkeydown = function(e) {
   if (e.key === "Enter") search();
 };
