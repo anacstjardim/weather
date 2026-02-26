@@ -2,6 +2,8 @@
 
 A simple weather dashboard that shows current weather for a city. Uses the Open-Meteo API (https://open-meteo.com/).
 
+https://anacstjardim.github.io/weather/
+
 ## What it does
 
 - Enter a city name and click Search or press Enter
