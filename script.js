@@ -1,64 +1,62 @@
-var cityInput = document.getElementById("city");
-var btn = document.getElementById("btn");
-var msg = document.getElementById("msg");
-var weatherDiv = document.getElementById("weather");
-
 function search() {
-  var city = cityInput.value;
+  var city = document.getElementById("city").value;
   city = city.trim();
   if (city === "") {
-    msg.textContent = "Type a city name";
-    msg.className = "msg err";
-    weatherDiv.style.display = "none";
+    document.getElementById("msg").innerHTML = "Type a city name first";
+    document.getElementById("msg").className = "msg err";
+    document.getElementById("weather").style.display = "none";
     return;
   }
 
-  weatherDiv.style.display = "none";
+  document.getElementById("weather").style.display = "none";
 
-  var geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(city) + "&count=1";
-  fetch(geoUrl)
-    .then(function(res) {
-      return res.json();
+  var url1 = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(city) + "&count=1";
+  fetch(url1)
+    .then(function(response) {
+      return response.json();
     })
-    .then(function(geoData) {
-      if (!geoData.results || geoData.results.length === 0) {
-        msg.textContent = "City not found";
-        msg.className = "msg err";
+    .then(function(data) {
+      if (!data.results || data.results.length === 0) {
+        document.getElementById("msg").innerHTML = "City not found";
+        document.getElementById("msg").className = "msg err";
         return;
       }
-      var lat = geoData.results[0].latitude;
-      var lon = geoData.results[0].longitude;
-      var name = geoData.results[0].name;
-      var country = geoData.results[0].country || geoData.results[0].country_code || "";
+      var lat = data.results[0].latitude;
+      var lon = data.results[0].longitude;
+      var name = data.results[0].name;
+      var country = data.results[0].country || data.results[0].country_code || "";
       if (country) name = name + ", " + country;
 
-      var weatherUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
-      return fetch(weatherUrl).then(function(res) {
-        return res.json();
-      }).then(function(weatherData) {
-        var cur = weatherData.current;
-        if (!cur) {
-          msg.textContent = "No data";
-          msg.className = "msg err";
-          return;
-        }
-        document.getElementById("cityName").textContent = name;
-        document.getElementById("temp").textContent = Math.round(cur.temperature_2m);
-        document.getElementById("weatherEmoji").textContent = getWeatherEmoji(cur.weather_code) + " (" + cur.weather_code + ")";
-        document.getElementById("desc").textContent = weatherDesc(cur.weather_code);
-        document.getElementById("hum").textContent = cur.relative_humidity_2m;
-        document.getElementById("wind").textContent = cur.wind_speed_10m;
-        msg.textContent = "";
-        weatherDiv.style.display = "block";
-      });
+      var url2 = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
+      fetch(url2)
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(data2) {
+          var cur = data2.current;
+          if (!cur) {
+            document.getElementById("msg").innerHTML = "No data";
+            document.getElementById("msg").className = "msg err";
+            return;
+          }
+          document.getElementById("cityName").innerHTML = name;
+          document.getElementById("temp").innerHTML = Math.round(cur.temperature_2m);
+          document.getElementById("weatherEmoji").innerHTML = getEmoji(cur.weather_code) + " (" + cur.weather_code + ")";
+          document.getElementById("desc").innerHTML = getDesc(cur.weather_code);
+          document.getElementById("hum").innerHTML = cur.relative_humidity_2m;
+          document.getElementById("wind").innerHTML = cur.wind_speed_10m;
+          document.getElementById("msg").innerHTML = "";
+          document.getElementById("msg").className = "msg";
+          document.getElementById("weather").style.display = "block";
+        });
     })
     .catch(function() {
-      msg.textContent = "Something went wrong try again";
-      msg.className = "msg err";
+      document.getElementById("msg").innerHTML = "Something went wrong try again";
+      document.getElementById("msg").className = "msg err";
     });
 }
 
-function weatherDesc(code) {
+function getDesc(code) {
   if (code === 0) return "Clear";
   if (code >= 1 && code <= 3) return "Cloudy";
   if (code >= 45 && code <= 48) return "Foggy";
@@ -68,8 +66,8 @@ function weatherDesc(code) {
   if (code >= 95 && code <= 99) return "Thunderstorm";
   return "Cloudy";
 }
-
-function getWeatherEmoji(code) {
+//getting emojis on just to make Jason happy
+function getEmoji(code) {
   if (code === 0) return "\u2600";
   if (code >= 1 && code <= 3) return "\u2601";
   if (code >= 45 && code <= 48) return "\u2593";
@@ -78,8 +76,3 @@ function getWeatherEmoji(code) {
   if (code >= 95 && code <= 99) return "\u26C8";
   return "\u2601";
 }
-
-btn.onclick = search;
-cityInput.onkeydown = function(e) {
-  if (e.key === "Enter") search();
-};
