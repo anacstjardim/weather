@@ -1,6 +1,6 @@
 # Weather Dashboard (W05)
 
-A simple weather dashboard that shows current weather for a city. Uses the [Open-Meteo](https://open-meteo.com/) API (free, no API key).
+A simple weather dashboard that shows current weather for a city. Uses the Open-Meteo API (https://open-meteo.com/).
 
 ## What it does
 
@@ -13,8 +13,6 @@ A simple weather dashboard that shows current weather for a city. Uses the [Open
 
 1. Open the project folder
 2. Open `index.html` in your browser
-
-No API key or server needed. You need an internet connection.
 
 ## API
 
@@ -29,4 +27,4 @@ No API key or server needed. You need an internet connection.
 
 ## Tech
 
-- HTML5, CSS3, Vanilla JavaScript (fetch, JSON, DOM)
+- HTML5, CSS3, JavaScript
