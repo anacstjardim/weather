@@ -14,7 +14,7 @@ https://anacstjardim.github.io/weather/
 ## How to run
 
 1. Open the project folder
-2. Open `index.html` in your browser
+2. Open `index.html` in your browser - Use MS Edge please
 
 ## API
 
